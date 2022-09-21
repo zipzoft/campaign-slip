@@ -1,0 +1,61 @@
+package repository
+
+import (
+	"campiagn-slip/models"
+	"campiagn-slip/pkg/database"
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"strings"
+	"time"
+)
+
+var _ SettingRepository = (*SettingRepo)(nil)
+
+type SettingRepository interface {
+	InsertCondition(condition models.Condition) (models.Condition, error)
+	UpdateCondition(condition models.Condition, c *gin.Context) error
+	FindCondition(prefix string) (*[]models.Condition, error)
+	FindOneCondition(prefix string) (model models.Condition, err error)
+}
+
+type SettingRepo struct {
+	//
+}
+
+func (r SettingRepo) InsertCondition(condition models.Condition) (models.Condition, error) {
+	condition.ID = primitive.NewObjectID()
+	condition.CreatedAt = time.Now()
+	_, err := database.InsertOne("condition", condition)
+	if err != nil {
+		return models.Condition{}, err
+	}
+	err = database.FindOne("condition", bson.M{"_id": condition.ID}).Decode(&condition)
+	return condition, err
+
+}
+
+func (r SettingRepo) UpdateCondition(condition models.Condition, c *gin.Context) error {
+
+	id, err := primitive.ObjectIDFromHex(c.Query("id"))
+	if err != nil {
+		return err
+	}
+	condition.ID = id
+	_, err = database.UpdateOne("condition", bson.M{"_id": condition.ID}, condition)
+
+	return err
+}
+
+func (r SettingRepo) FindCondition(prefix string) (*[]models.Condition, error) {
+	model := make([]models.Condition, 0)
+	_, err := database.Find("condition", bson.M{"prefix": prefix}, &model)
+	if err != nil {
+		return nil, err
+	}
+	return &model, nil
+}
+func (r SettingRepo) FindOneCondition(prefix string) (model models.Condition, err error) {
+	err = database.FindOne("condition", bson.M{"prefix": strings.ToLower(prefix)}).Decode(&model)
+	return model, err
+}

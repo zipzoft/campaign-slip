@@ -20,9 +20,9 @@ import (
 var _ TransactionRepository = (*TransactionRepo)(nil)
 
 type TransactionRepository interface {
-	GetTransaction(username, prefix string) (*models.Transaction, error)
+	GetTransaction(username, prefix string) (*models.TransactionTopUp, error)
 	GetCustomer(c *gin.Context) (*models.Customer, error)
-	InsertUserRedeem(transaction models.Transaction, condition models.Condition) ([]models.TransactionRedeem, error)
+	InsertUserRedeem(transaction models.TransactionTopUp, condition models.Condition) ([]models.TransactionRedeem, error)
 	WalletValidate(username, campaign, prefix string) (*models.WalletRequest, error, []validator.ApiError)
 	GetSettingID(name, prefix string) (*models.Wallet, error)
 }
@@ -31,7 +31,7 @@ type TransactionRepo struct {
 	//
 }
 
-func (t TransactionRepo) GetTransaction(username, prefix string) (*models.Transaction, error) {
+func (t TransactionRepo) GetTransaction(username, prefix string) (*models.TransactionTopUp, error) {
 	conn := config.GetConfig()
 	Username := strings.ToUpper(username)
 	Prefix := strings.ToLower(prefix)
@@ -71,7 +71,7 @@ func (t TransactionRepo) GetTransaction(username, prefix string) (*models.Transa
 		return nil, err
 	}
 
-	transaction := models.Transaction{}
+	transaction := models.TransactionTopUp{}
 	for _, item := range topUp.Data.DepositToday.Transactions {
 		transaction.Username = Username
 		transaction.Detail = append(transaction.Detail, item)
@@ -124,12 +124,13 @@ func (t TransactionRepo) GetCustomer(c *gin.Context) (*models.Customer, error) {
 	return customer, nil
 }
 
-func (t TransactionRepo) InsertUserRedeem(transaction models.Transaction, condition models.Condition) ([]models.TransactionRedeem, error) {
+func (t TransactionRepo) InsertUserRedeem(transaction models.TransactionTopUp, condition models.Condition) ([]models.TransactionRedeem, error) {
 
 	result := make([]models.TransactionRedeem, 0)
 	model := models.TransactionRedeem{}
-	checkRedeem := models.TransactionRedeem{}
+
 	con := 0
+
 	for i, s := range transaction.Detail {
 		if condition.Detail[con].SlipNumber == i+1 {
 			model.ID = primitive.NewObjectID()
@@ -141,27 +142,29 @@ func (t TransactionRepo) InsertUserRedeem(transaction models.Transaction, condit
 			model.AfterAmount = s.AfterAmount
 			model.SlipNumber = condition.Detail[con].SlipNumber
 			model.Coin = condition.Detail[con].RedeemCoin
-			model.CreatedAt = time.Now()
+			model.CreatedAt = time.Now().Add(7 * time.Hour)
 			model.IsRedeem = false
 			con++
-		}
-		filter := bson.M{
-			"username":    model.Username,
-			"date_bank":   model.DateBank,
-			"slip_number": model.SlipNumber,
-			"created_at":  bson.M{"$gte": time.Now().Truncate(24 * time.Hour).UTC()},
-		}
-		err := database.FindOne("user_redeem", filter).Decode(&checkRedeem)
-		if err != nil {
-			return nil, err
-		}
-		if checkRedeem.Username == "" {
-			_, err := database.InsertOne("user_redeem", model)
-			if err != nil {
+			filter := bson.M{
+				"username":    model.Username,
+				"date_bank":   model.DateBank,
+				"slip_number": model.SlipNumber,
+				"created_at":  bson.M{"$gte": time.Now().Truncate(24 * time.Hour).UTC()},
+			}
+			checkRedeem := models.TransactionRedeem{}
+			err := database.FindOne("user_redeem", filter).Decode(&checkRedeem)
+			if err != nil && err.Error() != "mongo: no documents in result" {
 				return nil, err
 			}
-			result = append(result, model)
+			if checkRedeem.Username == "" {
+				_, err := database.InsertOne("user_redeem", model)
+				if err != nil {
+					return nil, err
+				}
+				result = append(result, model)
+			}
 		}
+
 	}
 	return result, nil
 }

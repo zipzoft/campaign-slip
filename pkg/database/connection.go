@@ -108,17 +108,7 @@ func FindOne(col string, filter map[string]interface{}) *mongo.SingleResult {
 	collection := Mongo.Database.Collection(col)
 	//defer Mongo.Disconnect()
 
-	queryFilter := bson.M{}
-	for key, val := range filter {
-		queryFilter[key] = val
-		if key == "created_at" {
-			queryFilter[key] = bson.M{
-				"$gte": val,
-			}
-		}
-	}
-
-	result := collection.FindOne(Mongo.context, queryFilter)
+	result := collection.FindOne(Mongo.context, filter)
 
 	return result
 }

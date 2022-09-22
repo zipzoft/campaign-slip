@@ -48,7 +48,7 @@ type TopUp struct {
 	} `json:"data"bson:"data"`
 }
 
-type Transaction struct {
+type TransactionTopUp struct {
 	Username string `json:"username"bson:"username"`
 	Detail   []struct {
 		BankName        string  `json:"bank_name" bson:"bank_name"`

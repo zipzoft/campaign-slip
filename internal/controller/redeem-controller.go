@@ -18,11 +18,15 @@ func NewRedeemController(repo repository.RedeemRepository) *RedeemController {
 }
 
 func (ctrl *RedeemController) Redeem(c *gin.Context) {
-	username := c.Query("username")
-	prefix := c.Query("prefix")
 	campaign := c.Query("campaign")
+	var userRedeem models.TransactionRedeem
+	body, err := io.ReadAll(c.Request.Body)
+	err = json.Unmarshal(body, &userRedeem)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+	}
 	trans := repository.TransactionRepo{}
-	walletRequest, err, validateErr := trans.WalletValidate(username, prefix, campaign)
+	walletRequest, err, validateErr := trans.WalletValidate(userRedeem.Username, campaign, userRedeem.Prefix)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -31,23 +35,16 @@ func (ctrl *RedeemController) Redeem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, validateErr)
 		return
 	}
-	var userRedeem models.TransactionRedeem
-	body, err := io.ReadAll(c.Request.Body)
-	json.Unmarshal(body, &userRedeem)
-	userRedeem, err = ctrl.repo.UpdateRedeem(userRedeem)
+	_, err = ctrl.repo.UpdateRedeem(userRedeem)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 	transaction, err := ctrl.repo.EarnCoin(walletRequest)
+	_, err = ctrl.repo.AddTransactionWallet(transaction, err)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "earn coin/transaction wallet invalid!"})
 		return
 	}
-	_, err = ctrl.repo.AddTransactionWallet(transaction)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"transaction": transaction, "user_redeem": userRedeem}, "message": "success"})
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"transaction": transaction}, "message": "success"})
 }

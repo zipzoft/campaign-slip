@@ -174,11 +174,15 @@ func (t TransactionRepo) WalletValidate(username, campaign, prefix string) (*mod
 	if err != nil {
 		return nil, err, nil
 	}
-	walletRequest.Username = username
-	walletRequest.Prefix = prefix
-	walletRequest.Name = campaign
-	walletRequest.SettingID = wallet.Data[0].Id
-	walletRequest.Note = walletRequest.Name
+	if len(wallet.Data) > 0 {
+		walletRequest.Username = username
+		walletRequest.Prefix = prefix
+		walletRequest.Name = campaign
+		walletRequest.SettingID = wallet.Data[0].Id
+		walletRequest.Note = walletRequest.Name
+	} else {
+		return nil, errors.New("ไม่พบข้อมูลกิจกรรม" + campaign), nil
+	}
 
 	validateErr := validator.Validate(walletRequest)
 

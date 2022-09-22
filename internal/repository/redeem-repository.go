@@ -17,21 +17,24 @@ import (
 var _ RedeemRepository = (*RedeemRepo)(nil)
 
 type RedeemRepository interface {
-	UpdateRedeem(userRedeem models.TransactionRedeem) (models.TransactionRedeem, error)
+	UpdateRedeem(userRedeem models.TransactionRedeem) (*models.TransactionRedeem, error)
 	EarnCoin(wallet *models.WalletRequest) (*models.TransactionWallet, error)
-	AddTransactionWallet(transaction *models.TransactionWallet) (*models.TransactionWallet, error)
+	AddTransactionWallet(transaction *models.TransactionWallet, err error) (*models.TransactionWallet, error)
 	GetUserRedeem(username string) ([]models.TransactionRedeem, error)
 }
 type RedeemRepo struct {
 	//
 }
 
-func (r RedeemRepo) UpdateRedeem(userRedeem models.TransactionRedeem) (models.TransactionRedeem, error) {
+func (r RedeemRepo) UpdateRedeem(userRedeem models.TransactionRedeem) (*models.TransactionRedeem, error) {
 
-	filter := bson.M{"_id": userRedeem.ID}
+	filter := bson.M{"_id": userRedeem.ID, "is_redeem": false}
 	userRedeem.IsRedeem = true
-	_, err := database.UpdateOne("user_redeem", filter, userRedeem)
-	return userRedeem, err
+	result, err := database.UpdateOne("user_redeem", filter, userRedeem)
+	if result.ModifiedCount == 0 {
+		return nil, errors.New("ModifiedCount = 0")
+	}
+	return &userRedeem, err
 
 }
 func (r RedeemRepo) EarnCoin(wallet *models.WalletRequest) (*models.TransactionWallet, error) {
@@ -81,10 +84,15 @@ func (r RedeemRepo) EarnCoin(wallet *models.WalletRequest) (*models.TransactionW
 
 	return result, nil
 }
-func (r RedeemRepo) AddTransactionWallet(transaction *models.TransactionWallet) (*models.TransactionWallet, error) {
+func (r RedeemRepo) AddTransactionWallet(transaction *models.TransactionWallet, err error) (*models.TransactionWallet, error) {
 	transaction.ID = primitive.NewObjectID()
-
-	_, err := database.InsertOne("transactions_wallet", transaction)
+	if err != nil {
+		transaction.Response = map[string]interface{}{
+			"message": "เกิดข้อผิดพลาดในการเพิ่ม coin",
+		}
+		_, err = database.InsertOne("transactions_wallet", transaction)
+	}
+	_, err = database.InsertOne("transactions_wallet", transaction)
 
 	if err != nil {
 		return nil, err

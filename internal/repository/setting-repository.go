@@ -3,6 +3,7 @@ package repository
 import (
 	"campiagn-slip/models"
 	"campiagn-slip/pkg/database"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,17 +25,20 @@ type SettingRepo struct {
 }
 
 func (r SettingRepo) InsertCondition(condition models.Condition) (models.Condition, error) {
-	condition.ID = primitive.NewObjectID()
-	condition.CreatedAt = time.Now()
-	_, err := database.InsertOne("condition", condition)
-	if err != nil {
-		return models.Condition{}, err
+	checkCondition := models.Condition{}
+	database.FindOne("condition", bson.M{"prefix": condition.Prefix}).Decode(&checkCondition)
+	if checkCondition.Prefix == "" {
+		condition.ID = primitive.NewObjectID()
+		condition.CreatedAt = time.Now()
+		_, err := database.InsertOne("condition", condition)
+		if err != nil {
+			return models.Condition{}, err
+		}
+		err = database.FindOne("condition", bson.M{"_id": condition.ID}).Decode(&condition)
+		return condition, err
 	}
-	err = database.FindOne("condition", bson.M{"_id": condition.ID}).Decode(&condition)
-	return condition, err
-
+	return checkCondition, fmt.Errorf("prefix ถูกใช้งานแล้ว")
 }
-
 func (r SettingRepo) UpdateCondition(condition models.Condition, c *gin.Context) error {
 
 	id, err := primitive.ObjectIDFromHex(c.Query("id"))
@@ -46,10 +50,15 @@ func (r SettingRepo) UpdateCondition(condition models.Condition, c *gin.Context)
 
 	return err
 }
+func (r SettingRepo) FindCondition(prefix string) (condition *[]models.Condition, err error) {
 
-func (r SettingRepo) FindCondition(prefix string) (*[]models.Condition, error) {
 	model := make([]models.Condition, 0)
-	_, err := database.Find("condition", bson.M{"prefix": prefix}, &model)
+	filter := bson.M{"prefix": strings.ToLower(prefix)}
+	if prefix == "" {
+		delete(filter, "prefix")
+	}
+	_, err = database.Find("condition", filter, &model)
+
 	if err != nil {
 		return nil, err
 	}

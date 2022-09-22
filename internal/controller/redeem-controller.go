@@ -17,11 +17,12 @@ func NewRedeemController(repo repository.RedeemRepository) *RedeemController {
 	return &RedeemController{repo: repo}
 }
 
-func (ctrl *RedeemController) GetRedeem(c *gin.Context) {
+func (ctrl *RedeemController) Redeem(c *gin.Context) {
 	username := c.Query("username")
 	prefix := c.Query("prefix")
 	campaign := c.Query("campaign")
-	walletRequest, err, validateErr := repository.TransactionRepo{}.WalletValidate(username, prefix, campaign)
+	trans := repository.TransactionRepo{}
+	walletRequest, err, validateErr := trans.WalletValidate(username, prefix, campaign)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -30,10 +31,10 @@ func (ctrl *RedeemController) GetRedeem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, validateErr)
 		return
 	}
-	var redeem models.TransactionRedeem
+	var userRedeem models.TransactionRedeem
 	body, err := io.ReadAll(c.Request.Body)
-	json.Unmarshal(body, &redeem)
-	redeem, err = ctrl.repo.UpdateRedeem(redeem)
+	json.Unmarshal(body, &userRedeem)
+	userRedeem, err = ctrl.repo.UpdateRedeem(userRedeem)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -43,10 +44,10 @@ func (ctrl *RedeemController) GetRedeem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	_, err = ctrl.repo.AddNewTransaction(transaction)
+	_, err = ctrl.repo.AddTransactionWallet(transaction)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"redeem": redeem, "transaction": transaction}, "message": "success"})
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"transaction": transaction, "user_redeem": userRedeem}, "message": "success"})
 }

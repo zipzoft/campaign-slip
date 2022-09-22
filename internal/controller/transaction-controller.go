@@ -18,6 +18,8 @@ func NewTransactionController(repo repository.TransactionRepository) *Transactio
 
 func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 	customer, err := ctrl.repo.GetCustomer(c)
+	settingRepo := repository.SettingRepo{}
+	redeemRepo := repository.RedeemRepo{}
 	var transactionBonus models.Transaction
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err)
@@ -28,7 +30,7 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	condition, err := repository.SettingRepo{}.FindOneCondition(customer.Data.Prefix)
+	condition, err := settingRepo.FindOneCondition(customer.Data.Prefix)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -44,9 +46,9 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, err)
 				return
 			}
-			redeem, err := repository.RedeemRepo{}.GetUserRedeem(customer.Data.Username)
+			userRedeem, err := redeemRepo.GetUserRedeem(customer.Data.Username)
 			c.JSON(http.StatusOK,
-				gin.H{"data": gin.H{"transaction": transaction, "user_redeem": redeem},
+				gin.H{"data": gin.H{"transaction": transaction, "user_redeem": userRedeem},
 					"message": "เพิ่มข้อมูลสลิปที่ตรงตามเงื่อนไข" + strconv.Itoa(len(result)) + "สลิป"})
 			return
 		}
@@ -56,12 +58,8 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"data": gin.H{"message": err.Error()}})
 		return
 	}
-	redeem, err := repository.RedeemRepo{}.GetUserRedeem(customer.Data.Username)
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"transaction": transaction, "user_redeem": redeem}})
+	userRedeem, err := redeemRepo.GetUserRedeem(customer.Data.Username)
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"transaction": transaction, "user_redeem": userRedeem}, "message": "ไม่พบสลิปที่ตรงตามเงื่อนไขเพิ่มเติม"})
 	return
-
-}
-
-func (ctrl *RedeemController) Redeem() {
 
 }

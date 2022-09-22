@@ -17,21 +17,21 @@ import (
 var _ RedeemRepository = (*RedeemRepo)(nil)
 
 type RedeemRepository interface {
-	UpdateRedeem(redeem models.TransactionRedeem) (models.TransactionRedeem, error)
+	UpdateRedeem(userRedeem models.TransactionRedeem) (models.TransactionRedeem, error)
 	EarnCoin(wallet *models.WalletRequest) (*models.TransactionWallet, error)
-	AddNewTransaction(transaction *models.TransactionWallet) (*models.TransactionWallet, error)
+	AddTransactionWallet(transaction *models.TransactionWallet) (*models.TransactionWallet, error)
 	GetUserRedeem(username string) ([]models.TransactionRedeem, error)
 }
 type RedeemRepo struct {
 	//
 }
 
-func (r RedeemRepo) UpdateRedeem(redeem models.TransactionRedeem) (models.TransactionRedeem, error) {
+func (r RedeemRepo) UpdateRedeem(userRedeem models.TransactionRedeem) (models.TransactionRedeem, error) {
 
-	filter := bson.M{"_id": redeem.ID}
-	redeem.IsRedeem = true
-	_, err := database.UpdateOne("user_redeem", filter, redeem)
-	return redeem, err
+	filter := bson.M{"_id": userRedeem.ID}
+	userRedeem.IsRedeem = true
+	_, err := database.UpdateOne("user_redeem", filter, userRedeem)
+	return userRedeem, err
 
 }
 func (r RedeemRepo) EarnCoin(wallet *models.WalletRequest) (*models.TransactionWallet, error) {
@@ -81,7 +81,7 @@ func (r RedeemRepo) EarnCoin(wallet *models.WalletRequest) (*models.TransactionW
 
 	return result, nil
 }
-func (r RedeemRepo) AddNewTransaction(transaction *models.TransactionWallet) (*models.TransactionWallet, error) {
+func (r RedeemRepo) AddTransactionWallet(transaction *models.TransactionWallet) (*models.TransactionWallet, error) {
 	transaction.ID = primitive.NewObjectID()
 
 	_, err := database.InsertOne("transactions_wallet", transaction)
@@ -94,14 +94,14 @@ func (r RedeemRepo) AddNewTransaction(transaction *models.TransactionWallet) (*m
 }
 func (r RedeemRepo) GetUserRedeem(username string) ([]models.TransactionRedeem, error) {
 
-	redeem := make([]models.TransactionRedeem, 0)
+	userRedeem := make([]models.TransactionRedeem, 0)
 	filter := bson.M{
 		"username":   username,
 		"created_at": bson.M{"$gte": time.Now().Truncate(24 * time.Hour).UTC()},
 	}
-	_, err := database.Find("user_redeem", filter, &redeem)
+	_, err := database.Find("user_redeem", filter, &userRedeem)
 	if err != nil {
 		return nil, err
 	}
-	return redeem, err
+	return userRedeem, err
 }

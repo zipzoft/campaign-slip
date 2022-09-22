@@ -59,7 +59,7 @@ func Aggregate(col string, pipeline interface{}, option ...*options.AggregateOpt
 	Mongo := MongoConnection()
 	collection := Mongo.Database.Collection(col)
 	result, err := collection.Aggregate(Mongo.context, pipeline, option...)
-	defer Mongo.Disconnect()
+	//defer Mongo.Disconnect()
 
 	return result, err
 }
@@ -68,7 +68,7 @@ func InsertOne(col string, doc interface{}) (*mongo.InsertOneResult, error) {
 	Mongo := MongoConnection()
 	collection := Mongo.Database.Collection(col)
 	result, err := collection.InsertOne(Mongo.context, doc)
-	defer Mongo.Disconnect()
+	//defer Mongo.Disconnect()
 
 	return result, err
 }
@@ -80,7 +80,7 @@ func UpdateOne(col string, filter interface{}, doc interface{}) (*mongo.UpdateRe
 		"$set": doc,
 	}
 	result, err := collection.UpdateOne(Mongo.context, filter, data)
-	defer Mongo.Disconnect()
+	//defer Mongo.Disconnect()
 
 	return result, err
 }
@@ -90,7 +90,7 @@ func Find(col string, query interface{}, model interface{}, option ...*options.F
 	collection := Mongo.Database.Collection(col)
 	result, err := collection.Find(Mongo.context, query, option...)
 
-	defer Mongo.Disconnect()
+	//defer Mongo.Disconnect()
 
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func Find(col string, query interface{}, model interface{}, option ...*options.F
 func FindOne(col string, filter map[string]interface{}) *mongo.SingleResult {
 	Mongo := MongoConnection()
 	collection := Mongo.Database.Collection(col)
-	defer Mongo.Disconnect()
+	//defer Mongo.Disconnect()
 
 	queryFilter := bson.M{}
 	for key, val := range filter {
@@ -127,7 +127,7 @@ func Pagination(col string, query map[string]interface{}, model interface{}, pag
 	Mongo := MongoConnection()
 	collection := Mongo.Database.Collection(col)
 
-	defer Mongo.Disconnect()
+	//defer Mongo.Disconnect()
 
 	queryFilter := bson.M{}
 	for key, val := range query {
@@ -176,7 +176,7 @@ func FindOneAndUpdate(col string, filter interface{}, update interface{}) *mongo
 	Mongo := MongoConnection()
 	collection := Mongo.Database.Collection(col)
 	result := collection.FindOneAndUpdate(Mongo.context, filter, update)
-	defer Mongo.Disconnect()
+	//defer Mongo.Disconnect()
 
 	return result
 }
@@ -185,7 +185,7 @@ func FindOneAndDelete(col string, filter interface{}) *mongo.SingleResult {
 	Mongo := MongoConnection()
 	collection := Mongo.Database.Collection(col)
 	result := collection.FindOneAndDelete(Mongo.context, filter)
-	defer Mongo.Disconnect()
+	//defer Mongo.Disconnect()
 
 	return result
 }
@@ -204,7 +204,7 @@ func CountDocument(col string, filter interface{}) (int64, error) {
 
 func InsertMany(col string, docs []interface{}) (*mongo.InsertManyResult, error) {
 	Mongo := MongoConnection()
-	defer Mongo.Disconnect()
+	//defer Mongo.Disconnect()
 	collection := Mongo.Database.Collection(col)
 	result, err := collection.InsertMany(Mongo.context, docs)
 	return result, err

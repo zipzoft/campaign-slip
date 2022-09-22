@@ -13,11 +13,11 @@ func Routes(route *gin.Engine) {
 
 	v1 := route.Group("api/v1")
 	{
-		v1.GET("transaction", transactionController.GetTransaction) // ดึง API customer/top-up  เพิ่มข้อมูล user_redeem
-		v1.GET("settings", settingController.Condition)
-		v1.POST("settings", settingController.InsertAndUpdateCondition)
-		v1.PATCH("settings", settingController.InsertAndUpdateCondition)
-		v1.POST("redeem", redeemController.GetRedeem)
+		v1.GET("transaction/topup", transactionController.GetTransaction) // ดึง API customer/top-up เพิ่มข้อมูล user_redeem  param query username,prefix
+		v1.GET("settings", settingController.Condition)                   // get condition
+		v1.POST("settings", settingController.InsertAndUpdateCondition)   // insert condition
+		v1.PATCH("settings", settingController.InsertAndUpdateCondition)  // update condition
+		v1.POST("redeem", redeemController.Redeem)
 
 		// ------------------------------------------------------------
 		// Don't remove this line if you don't want to be maintainer.

@@ -42,7 +42,7 @@ func (r SettingRepo) InsertCondition(condition models.Condition) (models.Conditi
 }
 func (r SettingRepo) UpdateCondition(condition models.Condition, c *gin.Context) error {
 
-	id, err := primitive.ObjectIDFromHex(c.Query("id"))
+	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (r SettingRepo) UpdateCondition(condition models.Condition, c *gin.Context)
 }
 func (r SettingRepo) DeleteCondition(condition models.Condition, c *gin.Context) error {
 
-	id, err := primitive.ObjectIDFromHex(c.Query("id"))
+	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
 		return err
 	}

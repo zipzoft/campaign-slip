@@ -16,25 +16,25 @@ type TopUp struct {
 		AccountNumber string        `json:"account_number"bson:"account_number"`
 		BankName      string        `json:"bank_name"bson:"bank_name"`
 		Credit        float64       `json:"credit"bson:"credit"`
-		TurnOver      int           `json:"turn_over"bson:"turn_over"`
-		TotalWithdraw int           `json:"total_withdraw"bson:"total_withdraw"`
-		Wallet        int           `json:"wallet"bson:"wallet"`
-		Point         int           `json:"point"bson:"point"`
-		WalletSpin    int           `json:"wallet_spin"bson:"wallet_spin"`
-		WalletPost    int           `json:"wallet_post"bson:"wallet_post"`
+		TurnOver      float32       `json:"turn_over"bson:"turn_over"`
+		TotalWithdraw float32       `json:"total_withdraw"bson:"total_withdraw"`
+		Wallet        float32       `json:"wallet"bson:"wallet"`
+		Point         float32       `json:"point"bson:"point"`
+		WalletSpin    float32       `json:"wallet_spin"bson:"wallet_spin"`
+		WalletPost    float32       `json:"wallet_post"bson:"wallet_post"`
 		RewardPoint   interface{}   `json:"reward_point"bson:"reward_point"`
 		Under         []interface{} `json:"under"bson:"under"`
 		DepositToday  struct {
-			TopUp        int `json:"top_up"bson:"top_up"`
-			Bonus        int `json:"bonus"bson:"bonus"`
-			Count        int `json:"count"bson:"count"`
+			TopUp        float64 `json:"top_up"bson:"top_up"`
+			Bonus        float64 `json:"bonus"bson:"bonus"`
+			Count        float64 `json:"count"bson:"count"`
 			Transactions []struct {
 				BankName        string  `json:"bank_name" bson:"bank_name"`
 				DateBank        string  `json:"date_bank"bson:"date_bank"`
 				AccountTransfer string  `json:"account_transfer"bson:"account_transfer"`
-				Amount          int     `json:"amount"bson:"amount"`
-				Bonus           int     `json:"bonus"bson:"bonus"`
-				TopUp           int     `json:"top_up"bson:"top_up"`
+				Amount          float64 `json:"amount"bson:"amount"`
+				Bonus           float64 `json:"bonus"bson:"bonus"`
+				TopUp           float64 `json:"top_up"bson:"top_up"`
 				BeforeAmount    float64 `json:"before_amount"bson:"before_amount"`
 				AfterAmount     float64 `json:"after_amount"bson:"after_amount"`
 				Remark          string  `json:"remark"bson:"remark"`
@@ -56,9 +56,9 @@ type TransactionTopUp struct {
 		BankName        string  `json:"bank_name" bson:"bank_name"`
 		DateBank        string  `json:"date_bank"bson:"date_bank"`
 		AccountTransfer string  `json:"account_transfer"bson:"account_transfer"`
-		Amount          int     `json:"amount"bson:"amount"`
-		Bonus           int     `json:"bonus"bson:"bonus"`
-		TopUp           int     `json:"top_up"bson:"top_up"`
+		Amount          float64 `json:"amount"bson:"amount"`
+		Bonus           float64 `json:"bonus"bson:"bonus"`
+		TopUp           float64 `json:"top_up"bson:"top_up"`
 		BeforeAmount    float64 `json:"before_amount"bson:"before_amount"`
 		AfterAmount     float64 `json:"after_amount"bson:"after_amount"`
 		Remark          string  `json:"remark"bson:"remark"`

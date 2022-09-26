@@ -38,7 +38,7 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 		return
 	}
 	for _, m := range transaction.Detail {
-		if m.BankName != "ADD_CREDIT" && m.BeforeAmount <= condition.MaxBalance && m.TopUp >= int(condition.MinTopUp) {
+		if m.BankName != "ADD_CREDIT" && m.BeforeAmount <= condition.MaxBalance && m.TopUp >= condition.MinTopUp {
 			transactionBonus.Username = customer.Data.Username
 			transactionBonus.Detail = append(transactionBonus.Detail, m)
 		}

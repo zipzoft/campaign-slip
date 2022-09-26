@@ -10,7 +10,7 @@ type TransactionRedeem struct {
 	Username     string             `json:"username"bson:"username"`
 	Prefix       string             `json:"prefix"bson:"prefix"`
 	DateBank     string             `json:"date_bank"bson:"date_bank"`
-	TopUp        int                `json:"top_up"bson:"top_up"`
+	TopUp        float64            `json:"top_up"bson:"top_up"`
 	BeforeAmount float64            `json:"before_amount"bson:"before_amount"`
 	AfterAmount  float64            `json:"after_amount"bson:"after_amount"`
 	SlipNumber   int                `json:"slip_number"bson:"slip_number"`

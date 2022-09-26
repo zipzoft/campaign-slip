@@ -45,6 +45,16 @@ func (ctrl *SettingController) InsertAndUpdateCondition(c *gin.Context) {
 		return
 
 	}
+	if c.Request.Method == "DELETE" {
+		err = ctrl.repo.DeleteCondition(condition, c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
+			return
+		}
+		c.JSON(http.StatusOK, "success")
+		return
+
+	}
 }
 func (ctrl *SettingController) Condition(c *gin.Context) {
 	condition, err := ctrl.repo.FindCondition(c)

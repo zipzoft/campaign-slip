@@ -16,6 +16,7 @@ var _ SettingRepository = (*SettingRepo)(nil)
 type SettingRepository interface {
 	InsertCondition(condition models.Condition) (models.Condition, error)
 	UpdateCondition(condition models.Condition, c *gin.Context) error
+	DeleteCondition(condition models.Condition, c *gin.Context) error
 	FindCondition(c *gin.Context) (result interface{}, err error)
 	FindOneCondition(prefix string) (model models.Condition, err error)
 }
@@ -49,6 +50,17 @@ func (r SettingRepo) UpdateCondition(condition models.Condition, c *gin.Context)
 	_, err = database.UpdateOne("condition", bson.M{"_id": condition.ID}, condition)
 
 	return err
+}
+func (r SettingRepo) DeleteCondition(condition models.Condition, c *gin.Context) error {
+
+	id, err := primitive.ObjectIDFromHex(c.Query("id"))
+	if err != nil {
+		return err
+	}
+	condition.ID = id
+	result := database.FindOneAndDelete("condition", bson.M{"_id": condition.ID})
+
+	return result.Err()
 }
 func (r SettingRepo) FindCondition(c *gin.Context) (result interface{}, err error) {
 	prefix := c.Query("prefix")

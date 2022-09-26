@@ -3,7 +3,6 @@ package controller
 import (
 	"campiagn-slip/internal/repository"
 	"campiagn-slip/models"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
@@ -32,9 +31,6 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	//transaction := models.TransactionTopUp{}
-	//body, err := io.ReadAll(c.Request.Body)
-	//json.Unmarshal(body, &transaction)
 
 	condition, err := settingRepo.FindOneCondition(customer.Data.Prefix)
 	if err != nil {
@@ -64,18 +60,7 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 		return
 	}
 	userRedeem, err := redeemRepo.GetUserRedeem(customer.Data.Username)
-	trans := map[string]interface{}{}
-	trans["transaction"] = transaction
-	trans["total"] = Count(transaction)
 	c.JSON(http.StatusOK, gin.H{"data": bson.M{"data": transaction, "user_redeem": userRedeem, "message": "ไม่พบสลิปที่ตรงตามเงื่อนไขเพิ่มเติม"}})
 	return
 
-}
-func Count(transaction *models.TransactionTopUp) (counter int) {
-	counter = 0
-	for _, i := range transaction.Detail {
-		fmt.Println(i)
-		counter++
-	}
-	return counter
 }

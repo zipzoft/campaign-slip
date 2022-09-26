@@ -17,6 +17,7 @@ func Routes(route *gin.Engine) {
 		v1.GET("settings", settingController.Condition)                   // get condition
 		v1.POST("settings", settingController.InsertAndUpdateCondition)   // insert condition
 		v1.PATCH("settings", settingController.InsertAndUpdateCondition)  // update condition
+		v1.DELETE("settings", settingController.InsertAndUpdateCondition) // delete condition
 		v1.POST("redeem", redeemController.Redeem)
 
 		// ------------------------------------------------------------

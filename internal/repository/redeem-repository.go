@@ -5,6 +5,7 @@ import (
 	"campiagn-slip/config"
 	"campiagn-slip/models"
 	"campiagn-slip/pkg/database"
+	times "campiagn-slip/pkg/time"
 	"encoding/json"
 	"errors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -104,8 +105,10 @@ func (r RedeemRepo) GetUserRedeem(username string) ([]models.TransactionRedeem, 
 
 	userRedeem := make([]models.TransactionRedeem, 0)
 	filter := bson.M{
-		"username":   username,
-		"created_at": bson.M{"$gte": time.Now().Truncate(24 * time.Hour).UTC()},
+		"username": username,
+		"created_at": bson.M{
+			"$gte": primitive.NewDateTimeFromTime(times.InBKK().Truncate(24 * time.Hour)),
+		},
 	}
 	_, err := database.Find("user_redeem", filter, &userRedeem)
 	if err != nil {

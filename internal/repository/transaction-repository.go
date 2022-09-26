@@ -4,6 +4,7 @@ import (
 	"campiagn-slip/config"
 	"campiagn-slip/models"
 	"campiagn-slip/pkg/database"
+	times "campiagn-slip/pkg/time"
 	"campiagn-slip/pkg/validator"
 	"encoding/json"
 	"errors"
@@ -149,7 +150,9 @@ func (t TransactionRepo) InsertUserRedeem(transaction models.TransactionTopUp, c
 				"username":    model.Username,
 				"date_bank":   model.DateBank,
 				"slip_number": model.SlipNumber,
-				"created_at":  bson.M{"$gte": time.Now().Truncate(24 * time.Hour).UTC()},
+				"created_at": bson.M{
+					"$gte": primitive.NewDateTimeFromTime(times.InBKK().Truncate(24 * time.Hour)),
+				},
 			}
 			checkRedeem := models.TransactionRedeem{}
 			err := database.FindOne("user_redeem", filter).Decode(&checkRedeem)

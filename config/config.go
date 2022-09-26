@@ -17,6 +17,7 @@ type Config struct {
 	WalletSettingID string `mapstructure:"WALLET_SETTING_ID"`
 	CUSTOMER        string `mapstructure:"CUSTOMER"`
 	DEP             string `mapstructure:"DEP"`
+	IncreaseTime    int    `mapstructure:"INCREASE_TIME"`
 }
 type DatabaseConfiguration struct {
 	Driver       string

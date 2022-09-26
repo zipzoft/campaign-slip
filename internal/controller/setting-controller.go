@@ -53,6 +53,6 @@ func (ctrl *SettingController) Condition(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
 		return
 	}
-	c.JSON(http.StatusOK, condition)
+	c.JSON(http.StatusOK, gin.H{"data": condition})
 
 }

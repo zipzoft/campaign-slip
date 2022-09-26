@@ -67,7 +67,7 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 	trans := map[string]interface{}{}
 	trans["transaction"] = transaction
 	trans["total"] = Count(transaction)
-	c.JSON(http.StatusOK, gin.H{"data": bson.M{"transaction": transaction, "user_redeem": userRedeem}, "message": "ไม่พบสลิปที่ตรงตามเงื่อนไขเพิ่มเติม"})
+	c.JSON(http.StatusOK, gin.H{"data": bson.M{"data": transaction, "user_redeem": userRedeem, "message": "ไม่พบสลิปที่ตรงตามเงื่อนไขเพิ่มเติม"}})
 	return
 
 }

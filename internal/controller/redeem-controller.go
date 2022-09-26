@@ -5,6 +5,7 @@ import (
 	"campiagn-slip/models"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"io"
 	"net/http"
 )
@@ -28,7 +29,7 @@ func (ctrl *RedeemController) Redeem(c *gin.Context) {
 	trans := repository.TransactionRepo{}
 	walletRequest, err, validateErr := trans.WalletValidate(userRedeem.Username, campaign, userRedeem.Prefix)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
 		return
 	}
 	if validateErr != nil {
@@ -37,7 +38,7 @@ func (ctrl *RedeemController) Redeem(c *gin.Context) {
 	}
 	_, err = ctrl.repo.UpdateRedeem(userRedeem)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
 		return
 	}
 	transaction, err := ctrl.repo.EarnCoin(walletRequest)
@@ -46,5 +47,5 @@ func (ctrl *RedeemController) Redeem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "earn coin/transaction wallet invalid!"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"transaction": transaction}, "message": "success"})
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"data": transaction.Response, "message": "success"}})
 }

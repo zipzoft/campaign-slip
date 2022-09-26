@@ -3,7 +3,9 @@ package controller
 import (
 	"campiagn-slip/internal/repository"
 	"campiagn-slip/models"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
 	"strconv"
 )
@@ -48,22 +50,32 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 	if len(transactionBonus.Detail) >= condition.Detail[0].SlipNumber {
 		result, err := ctrl.repo.InsertUserRedeem(transactionBonus, condition)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, err)
+			c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
 			return
 		}
 		userRedeem, err := redeemRepo.GetUserRedeem(customer.Data.Username)
 		c.JSON(http.StatusOK,
-			gin.H{"data": gin.H{"transaction": transaction, "user_redeem": userRedeem},
-				"message": "เพิ่มข้อมูลสลิปที่ตรงตามเงื่อนไข" + strconv.Itoa(len(result)) + "สลิป"})
+			gin.H{"data": bson.M{"transaction": transaction, "user_redeem": userRedeem, "message": "เพิ่มข้อมูลสลิปที่ตรงตามเงื่อนไข" + strconv.Itoa(len(result)) + "สลิป"}})
 		return
 	}
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": gin.H{"message": err.Error()}})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
 		return
 	}
 	userRedeem, err := redeemRepo.GetUserRedeem(customer.Data.Username)
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"transaction": transaction, "user_redeem": userRedeem}, "message": "ไม่พบสลิปที่ตรงตามเงื่อนไขเพิ่มเติม"})
+	trans := map[string]interface{}{}
+	trans["transaction"] = transaction
+	trans["total"] = Count(transaction)
+	c.JSON(http.StatusOK, gin.H{"data": bson.M{"transaction": transaction, "user_redeem": userRedeem}, "message": "ไม่พบสลิปที่ตรงตามเงื่อนไขเพิ่มเติม"})
 	return
 
+}
+func Count(transaction *models.TransactionTopUp) (counter int) {
+	counter = 0
+	for _, i := range transaction.Detail {
+		fmt.Println(i)
+		counter++
+	}
+	return counter
 }

@@ -16,7 +16,7 @@ var _ SettingRepository = (*SettingRepo)(nil)
 type SettingRepository interface {
 	InsertCondition(condition models.Condition) (models.Condition, error)
 	UpdateCondition(condition models.Condition, c *gin.Context) error
-	FindCondition(prefix string) (*[]models.Condition, error)
+	FindCondition(c *gin.Context) (result interface{}, err error)
 	FindOneCondition(prefix string) (model models.Condition, err error)
 }
 
@@ -50,19 +50,21 @@ func (r SettingRepo) UpdateCondition(condition models.Condition, c *gin.Context)
 
 	return err
 }
-func (r SettingRepo) FindCondition(prefix string) (condition *[]models.Condition, err error) {
-
+func (r SettingRepo) FindCondition(c *gin.Context) (result interface{}, err error) {
+	prefix := c.Query("prefix")
+	page := c.Query("page")
+	limit := c.Query("limit")
 	model := make([]models.Condition, 0)
 	filter := bson.M{"prefix": strings.ToLower(prefix)}
 	if prefix == "" {
 		delete(filter, "prefix")
 	}
-	_, err = database.Find("condition", filter, &model)
+	result, err = database.Pagination("condition", filter, &model, page, limit)
 
 	if err != nil {
 		return nil, err
 	}
-	return &model, nil
+	return result, nil
 }
 func (r SettingRepo) FindOneCondition(prefix string) (model models.Condition, err error) {
 	err = database.FindOne("condition", bson.M{"prefix": strings.ToLower(prefix)}).Decode(&model)

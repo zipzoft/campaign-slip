@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type TopUp struct {
 	Success bool        `json:"success"`
@@ -68,4 +70,7 @@ type TransactionTopUp struct {
 		CreatedAt time.Time `json:"created_at"bson:"created_at"`
 		UpdatedAt time.Time `json:"updated_at"bson:"updated_at"`
 	} `json:"detail"bson:"detail"`
+	Page  int `json:"page"bson:"page"`
+	Limit int `json:"limit"bson:"limit"`
+	Total int `json:"total"bson:"total"`
 }

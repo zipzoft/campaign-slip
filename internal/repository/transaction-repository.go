@@ -24,7 +24,7 @@ type TransactionRepository interface {
 	GetTransaction(username, prefix string) (*models.TransactionTopUp, error)
 	GetCustomer(c *gin.Context) (*models.Customer, error)
 	InsertUserRedeem(transaction models.TransactionTopUp, condition models.Condition) ([]models.TransactionRedeem, error)
-	WalletValidate(username, campaign, prefix string) (*models.WalletRequest, error, []validator.ApiError)
+	WalletValidate(username, campaign, prefix string, coin int64) (*models.WalletRequest, error, []validator.ApiError)
 	GetSettingID(name, prefix string) (*models.Wallet, error)
 }
 
@@ -171,7 +171,7 @@ func (t TransactionRepo) InsertUserRedeem(transaction models.TransactionTopUp, c
 	}
 	return result, nil
 }
-func (t TransactionRepo) WalletValidate(username, campaign, prefix string) (*models.WalletRequest, error, []validator.ApiError) {
+func (t TransactionRepo) WalletValidate(username, campaign, prefix string, coin int64) (*models.WalletRequest, error, []validator.ApiError) {
 	walletRequest := &models.WalletRequest{}
 	wallet, err := t.GetSettingID(campaign, prefix)
 	if err != nil {

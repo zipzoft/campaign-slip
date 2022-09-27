@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 type RedeemController struct {
@@ -25,9 +26,12 @@ func (ctrl *RedeemController) Redeem(c *gin.Context) {
 	err = json.Unmarshal(body, &userRedeem)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
+		return
 	}
 	trans := repository.TransactionRepo{}
-	walletRequest, err, validateErr := trans.WalletValidate(userRedeem.Username, campaign, userRedeem.Prefix)
+
+	walletRequest, err, validateErr := trans.WalletValidate(userRedeem.Username, campaign, userRedeem.Prefix, userRedeem.Coin)
+	walletRequest.Coin = strconv.Itoa(int(userRedeem.Coin))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
 		return
@@ -44,8 +48,8 @@ func (ctrl *RedeemController) Redeem(c *gin.Context) {
 	transaction, err := ctrl.repo.EarnCoin(walletRequest)
 	_, err = ctrl.repo.AddTransactionWallet(transaction, err)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "earn coin/transaction wallet invalid!"})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": "earn coin/transaction wallet invalid!"}})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"data": transaction.Response, "message": "success"}})
+	c.JSON(http.StatusOK, gin.H{"data": bson.M{"data": transaction.Response, "message": "success"}})
 }

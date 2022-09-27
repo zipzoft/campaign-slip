@@ -11,6 +11,7 @@ type WalletRequest struct {
 	SettingID string `json:"setting_id" bson:"setting_id"`
 	Note      string `json:"note" bson:"note"`
 	Name      string `json:"name"bson:"name"`
+	Coin      string `json:"coin"bson:"coin"`
 }
 type Wallet struct {
 	Data []struct {

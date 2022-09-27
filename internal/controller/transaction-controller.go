@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
+	"sort"
 	"strconv"
 )
 
@@ -23,26 +24,34 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 	redeemRepo := repository.RedeemRepo{}
 	var transactionBonus models.TransactionTopUp
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
 		return
 	}
 	transaction, err := ctrl.repo.GetTransaction(customer.Data.Username, customer.Data.Prefix)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
 		return
 	}
-
 	condition, err := settingRepo.FindOneCondition(customer.Data.Prefix)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
 		return
 	}
+	// sort by bank_date
+	sort.SliceStable(transaction.Detail, func(i, j int) bool {
+		return transaction.Detail[i].DateBank < transaction.Detail[j].DateBank
+	})
+	// check condition
 	for _, m := range transaction.Detail {
-		if m.BankName != "ADD_CREDIT" && m.BeforeAmount <= condition.MaxBalance && m.TopUp >= condition.MinTopUp {
+		if m.BankName != "ADD_CREDIT" && m.BeforeAmount <= condition.MaxBalance && m.TopUp >= condition.MinTopUp && m.Bonus == 0 {
 			transactionBonus.Username = customer.Data.Username
 			transactionBonus.Detail = append(transactionBonus.Detail, m)
 		}
+		if len(transactionBonus.Detail) == condition.Detail[len(condition.Detail)-1].SlipNumber {
+			break
+		}
 	}
+	// check lowest index case
 	if len(transactionBonus.Detail) >= condition.Detail[0].SlipNumber {
 		result, err := ctrl.repo.InsertUserRedeem(transactionBonus, condition)
 		if err != nil {

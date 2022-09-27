@@ -17,7 +17,11 @@ type Config struct {
 	WalletSettingID string `mapstructure:"WALLET_SETTING_ID"`
 	CUSTOMER        string `mapstructure:"CUSTOMER"`
 	DEP             string `mapstructure:"DEP"`
-	IncreaseTime    int    `mapstructure:"INCREASE_TIME"`
+	GoogleRecaptcha struct {
+		Enabled bool   `mapstructure:"GOOGLE_RECAPTCHA_ENABLED"`
+		Secret  string `mapstructure:"GOOGLE_RECAPTCHA_SECRET"`
+	}
+	IncreaseTime int `mapstructure:"INCREASE_TIME"`
 }
 type DatabaseConfiguration struct {
 	Driver       string

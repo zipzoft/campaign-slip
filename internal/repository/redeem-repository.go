@@ -8,6 +8,7 @@ import (
 	times "campiagn-slip/pkg/time"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io/ioutil"
@@ -96,7 +97,7 @@ func (r RedeemRepo) AddTransactionWallet(transaction *models.TransactionWallet, 
 	_, err = database.InsertOne("transactions_wallet", transaction)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("เกิดข้อผิดพลาดในการเพิ่มข้อมูล transaction wallet")
 	}
 
 	return transaction, nil
@@ -112,7 +113,7 @@ func (r RedeemRepo) GetUserRedeem(username string) ([]models.TransactionRedeem, 
 	}
 	_, err := database.Find("user_redeem", filter, &userRedeem)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ไม่สามารถดึงข้อมูลโบนัสสลิปของ User นี้ได้")
 	}
 	return userRedeem, err
 }

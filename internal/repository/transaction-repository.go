@@ -57,7 +57,7 @@ func (t TransactionRepo) GetTransaction(username, prefix string) (*models.Transa
 	}(resp.Body)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ไม่สามารถดึงข้อมูลการเติมเงินได้")
 	}
 
 	var topUp models.TopUp
@@ -65,11 +65,11 @@ func (t TransactionRepo) GetTransaction(username, prefix string) (*models.Transa
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ไม่สามารถดึงข้อมูลการเติมเงินได้")
 	}
 
 	if err := json.Unmarshal(body, &topUp); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ไม่สามารถดึงข้อมูลการเติมเงินได้")
 	}
 
 	transaction := models.TransactionTopUp{}
@@ -107,7 +107,7 @@ func (t TransactionRepo) GetCustomer(c *gin.Context) (*models.Customer, error) {
 	}(resp.Body)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ไม่พบข้อมูล User")
 	}
 
 	var customer *models.Customer
@@ -115,11 +115,11 @@ func (t TransactionRepo) GetCustomer(c *gin.Context) (*models.Customer, error) {
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ไม่พบข้อมูล User")
 	}
 
 	if err := json.Unmarshal(body, &customer); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ไม่พบข้อมูล User")
 	}
 
 	return customer, nil
@@ -157,12 +157,12 @@ func (t TransactionRepo) InsertUserRedeem(transaction models.TransactionTopUp, c
 			checkRedeem := models.TransactionRedeem{}
 			err := database.FindOne("user_redeem", filter).Decode(&checkRedeem)
 			if err != nil && err.Error() != "mongo: no documents in result" {
-				return nil, err
+				return nil, fmt.Errorf("เกิดข้อผิดพลาดการดึงข้อมูลโบนัสสลิปของ user นี้")
 			}
 			if checkRedeem.Username == "" {
 				_, err := database.InsertOne("user_redeem", model)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("เกิดข้อผิดพลาดการเพิ่มข้อมูลโบนัสสลิปของ user นี้")
 				}
 				result = append(result, model)
 			}
@@ -175,7 +175,7 @@ func (t TransactionRepo) WalletValidate(username, campaign, prefix string, coin 
 	walletRequest := &models.WalletRequest{}
 	wallet, err := t.GetSettingID(campaign, prefix)
 	if err != nil {
-		return nil, err, nil
+		return nil, fmt.Errorf("ไม่พบข้อมูล Setting"), nil
 	}
 	if len(wallet.Data) > 0 {
 		walletRequest.Username = username

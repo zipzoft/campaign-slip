@@ -24,17 +24,17 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 	redeemRepo := repository.RedeemRepo{}
 	var transactionBonus models.TransactionTopUp
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": "ไม่พบ User ในระบบ"}})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": err.Error()}})
 		return
 	}
 	transaction, err := ctrl.repo.GetTransaction(customer.Data.Username, customer.Data.Prefix)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": "มีข้อผิดพลาดในการดึง top-up transaction"}})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": err.Error()}})
 		return
 	}
 	condition, err := settingRepo.FindOneCondition(customer.Data.Prefix)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": "ไม่พบ Setting ในระบบ"}})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": "ไม่พบ Setting ของ Prefix นี้ในระบบ"}})
 		return
 	}
 	// sort by bank_date
@@ -55,7 +55,7 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 	if len(transactionBonus.Detail) >= condition.Detail[0].SlipNumber {
 		result, err := ctrl.repo.InsertUserRedeem(transactionBonus, condition)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": "ไม่สามารถเพิ่มข้อมูลได้"}})
+			c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": err.Error()}})
 			return
 		}
 		userRedeem, err := redeemRepo.GetUserRedeem(customer.Data.Username)

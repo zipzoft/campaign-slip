@@ -24,17 +24,17 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 	redeemRepo := repository.RedeemRepo{}
 	var transactionBonus models.TransactionTopUp
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": err.Error()}})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": "ไม่พบ User ในระบบ"}})
 		return
 	}
 	transaction, err := ctrl.repo.GetTransaction(customer.Data.Username, customer.Data.Prefix)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": err.Error()}})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": "มีข้อผิดพลาดในการดึง top-up transaction"}})
 		return
 	}
 	condition, err := settingRepo.FindOneCondition(customer.Data.Prefix)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": err.Error()}})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": "ไม่พบ Setting ในระบบ"}})
 		return
 	}
 	// sort by bank_date
@@ -55,19 +55,19 @@ func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
 	if len(transactionBonus.Detail) >= condition.Detail[0].SlipNumber {
 		result, err := ctrl.repo.InsertUserRedeem(transactionBonus, condition)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": err.Error()}})
+			c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": "ไม่สามารถเพิ่มข้อมูลได้"}})
 			return
 		}
 		userRedeem, err := redeemRepo.GetUserRedeem(customer.Data.Username)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": err.Error()}})
+			return
+		}
 		c.JSON(http.StatusOK,
 			gin.H{"data": bson.M{"transaction": transactionBonus, "user_redeem": userRedeem, "message": "เพิ่มข้อมูลสลิปที่ตรงตามเงื่อนไข" + strconv.Itoa(len(result)) + "สลิป"}})
 		return
 	}
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"data": "", "user_redeem": "", "message": err.Error()}})
-		return
-	}
 	userRedeem, err := redeemRepo.GetUserRedeem(customer.Data.Username)
 	c.JSON(http.StatusOK, gin.H{"data": bson.M{"data": transactionBonus, "user_redeem": userRedeem, "message": "ไม่พบสลิปที่ตรงตามเงื่อนไขเพิ่มเติม"}})
 	return

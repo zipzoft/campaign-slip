@@ -33,7 +33,7 @@ func (ctrl *RedeemController) Redeem(c *gin.Context) {
 	walletRequest, err, validateErr := trans.WalletValidate(userRedeem.Username, campaign, userRedeem.Prefix, userRedeem.Coin)
 	walletRequest.Coin = strconv.Itoa(int(userRedeem.Coin))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": "WallerValidate" + err.Error()}})
 		return
 	}
 	if validateErr != nil {
@@ -42,13 +42,13 @@ func (ctrl *RedeemController) Redeem(c *gin.Context) {
 	}
 	_, err = ctrl.repo.UpdateRedeem(userRedeem)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": err.Error()}})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": "Update Redeem" + err.Error()}})
 		return
 	}
 	transaction, err := ctrl.repo.EarnCoin(walletRequest)
 	_, err = ctrl.repo.AddTransactionWallet(transaction, err)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": "earn coin/transaction wallet invalid!"}})
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": "Add TransactionWallet " + err.Error()}})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": bson.M{"data": transaction.Response, "message": "success"}})

@@ -33,7 +33,7 @@ func (r RedeemRepo) UpdateRedeem(userRedeem models.TransactionRedeem) (*models.T
 	userRedeem.IsRedeem = true
 	result, err := database.UpdateOne("user_redeem", filter, userRedeem)
 	if result.ModifiedCount == 0 {
-		return nil, errors.New("ModifiedCount = 0")
+		return nil, errors.New("สลิปนี้รับ coin ไปแล้ว")
 	}
 	return &userRedeem, err
 

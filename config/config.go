@@ -57,6 +57,9 @@ func New() *Config {
 	if err := viper.Unmarshal(&cfg); err != nil {
 		log.Println("Error type unmarshal", err)
 	}
+	// Map google recaptcha environment variables
+	cfg.GoogleRecaptcha.Enabled = viper.GetBool("GOOGLE_RECAPTCHA_ENABLED")
+	cfg.GoogleRecaptcha.Secret = viper.GetString("GOOGLE_RECAPTCHA_SECRET")
 
 	return &cfg
 }

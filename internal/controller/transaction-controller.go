@@ -3,11 +3,13 @@ package controller
 import (
 	"campiagn-slip/internal/repository"
 	"campiagn-slip/models"
+	times "campiagn-slip/pkg/time"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 )
 
 type TransactionController struct {
@@ -19,6 +21,16 @@ func NewTransactionController(repo repository.TransactionRepository) *Transactio
 }
 
 func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
+	now := times.InBKK()
+	if now.After(now.Truncate(24*time.Hour).Add(22*time.Hour).Add(30*time.Minute)) &&
+		now.Before(now.Truncate(24*time.Hour).Add(24*time.Hour)) {
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": "ปรับปรุงระบบ"}})
+		return
+	} else if now.Before(now.Truncate(24 * time.Hour).Add(1 * time.Hour)) {
+		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": "ปรับปรุงระบบ"}})
+		return
+	}
+
 	customer, err := ctrl.repo.GetCustomer(c)
 	settingRepo := repository.SettingRepo{}
 	redeemRepo := repository.RedeemRepo{}

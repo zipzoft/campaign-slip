@@ -11,6 +11,7 @@ func Routes(route *gin.Engine) {
 	transactionController := controller.NewTransactionController(repository.TransactionRepo{})
 	settingController := controller.NewSettingController(repository.SettingRepo{})
 	redeemController := controller.NewRedeemController(repository.RedeemRepo{})
+	reportController := controller.NewReportController(repository.ReportRepo{})
 
 	v1 := route.Group("api/v1")
 	{
@@ -19,7 +20,9 @@ func Routes(route *gin.Engine) {
 		v1.POST("settings", settingController.InsertAndUpdateCondition)       // insert condition
 		v1.PATCH("settings/:id", settingController.InsertAndUpdateCondition)  // update condition
 		v1.DELETE("settings/:id", settingController.InsertAndUpdateCondition) // delete condition
+
 		v1.POST("redeem", recaptcha.NewGinHandler(), redeemController.Redeem) // update user_redeem, earn_coin , transaction earn_coin
+		v1.GET("report", reportController.ReportUserRedeem)                   // query param prefix,dateFrom format "DD/MM/YYYY 00:00",dateTo  "DD/MM/YYYY 23:59"
 
 		// ------------------------------------------------------------
 		// Don't remove this line if you don't want to be maintainer.

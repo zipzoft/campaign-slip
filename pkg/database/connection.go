@@ -55,13 +55,14 @@ func MongoConnection() MongoConnect {
 	}
 }
 
-func Aggregate(col string, pipeline interface{}, option ...*options.AggregateOptions) (interface{}, error) {
+func Aggregate(col string, pipeline interface{}, results interface{}) (err error) {
 	Mongo := MongoConnection()
 	collection := Mongo.Database.Collection(col)
-	result, err := collection.Aggregate(Mongo.context, pipeline, option...)
-	//defer Mongo.Disconnect()
-
-	return result, err
+	result, err := collection.Aggregate(Mongo.context, pipeline)
+	if err := result.All(Mongo.context, results); err != nil {
+		//panic(err)
+	}
+	return
 }
 
 func InsertOne(col string, doc interface{}) (*mongo.InsertOneResult, error) {

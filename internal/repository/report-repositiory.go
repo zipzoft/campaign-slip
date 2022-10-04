@@ -17,8 +17,8 @@ type ReportRepo struct {
 }
 
 func (r ReportRepo) ReportTransaction(ctx *gin.Context) (interface{}, error) {
-	dateFrom := ctx.Query("dateFrom")
-	dateTo := ctx.Query("dateTo")
+	dateFrom := ctx.Query("date_from")
+	dateTo := ctx.Query("date_to")
 	Prefix := ctx.Query("prefix")
 
 	Aggregate := bson.A{

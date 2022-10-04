@@ -5,7 +5,7 @@ import (
 )
 
 type ReportData struct {
-	Username string              `json:"id"bson:"_id"`
+	Username string              `json:"username"bson:"_id"`
 	Data     []TransactionReport `json:"data"bson:"data"`
 	Count    int                 `json:"count"bson:"count"`
 }

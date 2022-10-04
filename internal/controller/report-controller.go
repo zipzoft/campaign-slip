@@ -4,6 +4,7 @@ import (
 	"campiagn-slip/internal/repository"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 type ReportController struct {
@@ -16,9 +17,11 @@ func NewReportController(repo repository.ReportRepository) *ReportController {
 
 func (r ReportController) ReportUserRedeem(c *gin.Context) {
 
-	result, err := r.repo.ReportTransaction(c)
+	Page, _ := strconv.Atoi(c.Query("page"))
+	PerPage, _ := strconv.Atoi(c.Query("limit"))
+	result, err := r.repo.ReportTransaction(c, Page, PerPage)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 	}
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, gin.H{"data": result})
 }

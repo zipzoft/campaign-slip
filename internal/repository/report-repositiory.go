@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strings"
+	"time"
 )
 
 var _ ReportRepository = (*ReportRepo)(nil)
@@ -18,14 +20,16 @@ type ReportRepo struct {
 }
 
 func (r ReportRepo) ReportTransaction(ctx *gin.Context, Page, PerPage int) (interface{}, error) {
-	dateFrom := ctx.Query("date_from")
-	dateTo := ctx.Query("date_to")
+	a := ctx.Query("date_from")
+	b := ctx.Query("date_to")
+	dateFrom, _ := time.Parse("2006-01-02 15:04", a)
+	dateTo, _ := time.Parse("2006-01-02 15:04", b)
 	Prefix := ctx.Query("prefix")
 	ArrPrefix := strings.Split(Prefix, ",")
 	Aggregate := bson.A{
 		bson.M{"$match": bson.M{"$and": bson.A{
-			bson.M{"date_bank": bson.M{"$gte": dateFrom}},
-			bson.M{"date_bank": bson.M{"$lte": dateTo}},
+			bson.M{"created_at": bson.M{"$gte": primitive.NewDateTimeFromTime(dateFrom)}},
+			bson.M{"created_at": bson.M{"$lte": primitive.NewDateTimeFromTime(dateTo)}},
 			bson.M{"prefix": bson.M{"$in": ArrPrefix}},
 			bson.M{"is_redeem": true},
 		}}},
@@ -73,8 +77,8 @@ func (r ReportRepo) ReportTransaction(ctx *gin.Context, Page, PerPage int) (inte
 	//var report []models.ReportData
 	ins, err := database.AggregatePagination("user_redeem", Aggregate)
 	response := bson.M{}
-	b, _ := json.Marshal(ins)
-	s := string(b)
+	j, _ := json.Marshal(ins)
+	s := string(j)
 	s = strings.TrimSpace(s)
 	s = s[1 : len(s)-1]
 	_ = json.Unmarshal([]byte(s), &response)

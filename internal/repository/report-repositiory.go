@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"campiagn-slip/models"
 	"campiagn-slip/pkg/database"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"strings"
@@ -35,12 +35,49 @@ func (r ReportRepo) ReportTransaction(ctx *gin.Context, Page, PerPage int) (inte
 		},
 		},
 		bson.M{"$project": bson.M{"data.prefix": 1, "data.coin": 1, "data.date_bank": 1, "data.slip_number": 1, "data.is_redeem": 1, "data.created_at": 1, "total_coin": 1}},
-		bson.M{"$sort": bson.M{"_id": 1}},
-		bson.M{"$skip": (Page - 1) * PerPage},
-		bson.M{"$limit": PerPage},
+		bson.M{"$facet": bson.M{
+			"metadata": []bson.M{
+				{
+					"$count": "total",
+				},
+				{
+					"$addFields": bson.M{"page": Page},
+				},
+			},
+			"data": []bson.M{
+				{
+					"$sort": bson.M{"_id": 1},
+				},
+				{
+					"$skip": (Page - 1) * PerPage,
+				},
+				{
+					"$limit": PerPage,
+				},
+				{
+					"$addFields": bson.M{"username": "$_id"},
+				},
+			},
+		}},
+		bson.M{"$project": bson.M{
+			"_id": false,
+			"total": bson.M{
+				"$arrayElemAt": []interface{}{"$metadata.total", 0},
+			},
+			"page": bson.M{
+				"$arrayElemAt": []interface{}{"$metadata.page", 0},
+			},
+			"data": 1,
+		}},
 	}
-	var ins []models.ReportData
-	err := database.Aggregate("user_redeem", Aggregate, &ins)
+	//var report []models.ReportData
+	ins, err := database.AggregatePagination("user_redeem", Aggregate)
+	response := bson.M{}
+	b, _ := json.Marshal(ins)
+	s := string(b)
+	s = strings.TrimSpace(s)
+	s = s[1 : len(s)-1]
+	_ = json.Unmarshal([]byte(s), &response)
 
-	return ins, err
+	return response, err
 }

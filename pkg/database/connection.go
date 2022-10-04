@@ -200,3 +200,23 @@ func InsertMany(col string, docs []interface{}) (*mongo.InsertManyResult, error)
 	result, err := collection.InsertMany(Mongo.context, docs)
 	return result, err
 }
+func AggregatePagination(col string, pipeline interface{}, option ...*options.AggregateOptions) ([]bson.M, error) {
+	Mongo := MongoConnection()
+	collection := Mongo.Database.Collection(col)
+
+	//defer Mongo.Disconnect()
+
+	result, err := collection.Aggregate(Mongo.context, pipeline, option...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var results []bson.M
+
+	if err = result.All(Mongo.context, &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}

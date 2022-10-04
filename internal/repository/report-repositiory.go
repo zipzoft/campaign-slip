@@ -35,7 +35,7 @@ func (r ReportRepo) ReportTransaction(ctx *gin.Context, Page, PerPage int) (inte
 		},
 		},
 		bson.M{"$project": bson.M{"data.prefix": 1, "data.coin": 1, "data.date_bank": 1, "data.slip_number": 1, "data.is_redeem": 1, "data.created_at": 1, "count": 1}},
-		bson.M{"$sort": bson.M{"created_at": 1}},
+		bson.M{"$sort": bson.M{"_id": 1}},
 		bson.M{"$skip": (Page - 1) * PerPage},
 		bson.M{"$limit": PerPage},
 	}

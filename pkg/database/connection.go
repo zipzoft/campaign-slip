@@ -9,8 +9,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"strconv"
-	"time"
 )
+
+var Mongo MongoConnect
 
 type MongoConnect struct {
 	Client   *mongo.Client
@@ -33,11 +34,7 @@ func MongoConnection() MongoConnect {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	ctx, connectErr := context.WithTimeout(context.Background(), 10*time.Second)
-	if connectErr != nil {
-		//
-	}
+	ctx := context.Background()
 
 	err = client.Connect(ctx)
 	if err != nil {
@@ -48,11 +45,13 @@ func MongoConnection() MongoConnect {
 
 	fmt.Println("Connect success")
 
-	return MongoConnect{
+	Mongo = MongoConnect{
 		context:  ctx,
 		Client:   client,
 		Database: giantDatabase,
 	}
+
+	return Mongo
 }
 
 func Aggregate(col string, pipeline interface{}, results interface{}) (err error) {

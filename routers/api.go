@@ -23,7 +23,6 @@ func Routes(route *gin.Engine) {
 
 		v1.POST("redeem", recaptcha.NewGinHandler(), redeemController.Redeem) // update user_redeem, earn_coin , transaction earn_coin
 		v1.GET("report", reportController.ReportUserRedeem)                   // query param prefix,date_from format "DD/MM/YYYY 00:00",date_to  "DD/MM/YYYY 23:59"
-		v1.POST("maintenance", transactionController.TestMaintenance)
 		// ------------------------------------------------------------
 		// Don't remove this line if you don't want to be maintainer.
 		v1.GET("health-check", func(ctx *gin.Context) {

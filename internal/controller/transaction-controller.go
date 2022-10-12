@@ -20,13 +20,22 @@ func NewTransactionController(repo repository.TransactionRepository) *Transactio
 	return &TransactionController{repo: repo}
 }
 
-func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
+func TestMaintenance() bool {
 	now := times.InBKK()
-	if now.After(now.Truncate(24*time.Hour).Add(22*time.Hour).Add(30*time.Minute)) &&
-		now.Before(now.Truncate(24*time.Hour).Add(24*time.Hour)) {
-		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": "ปรับปรุงระบบ"}})
-		return
+	validate1 := now.Truncate(24 * time.Hour).Add(14 * time.Hour)
+	validate2 := now.Truncate(24 * time.Hour).Add(15 * time.Hour)
+	if now.After(validate1) &&
+		now.Before(validate2) {
+		return true
 	} else if now.Before(now.Truncate(24 * time.Hour).Add(1 * time.Hour)) {
+		return true
+	}
+	return false
+}
+
+func (ctrl *TransactionController) GetTransaction(c *gin.Context) {
+
+	if TestMaintenance() {
 		c.JSON(http.StatusBadRequest, gin.H{"data": bson.M{"message": "ปรับปรุงระบบ"}})
 		return
 	}

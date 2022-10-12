@@ -22,14 +22,15 @@ func NewTransactionController(repo repository.TransactionRepository) *Transactio
 
 func TestMaintenance() bool {
 	now := times.InBKK()
-	validate1 := now.Truncate(24 * time.Hour).Add(14 * time.Hour)
-	validate2 := now.Truncate(24 * time.Hour).Add(15 * time.Hour)
+	validate1 := now.Truncate(24 * time.Hour).Add(22 * time.Hour)
+	validate2 := now.Truncate(24 * time.Hour).Add(24 * time.Hour)
 	if now.After(validate1) &&
 		now.Before(validate2) {
 		return true
-	} else if now.Before(now.Truncate(24 * time.Hour).Add(1 * time.Hour)) {
-		return true
 	}
+	//else if now.Before(now.Truncate(24 * time.Hour).Add(1 * time.Hour)) {
+	//	return true
+	//}
 	return false
 }
 
